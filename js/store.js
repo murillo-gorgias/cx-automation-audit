@@ -109,6 +109,11 @@ CXA.store = (function () {
     for (var i = 0; i < records.length; i++) {
       if (records[i].id === id) {
         Object.keys(patch).forEach(function (k) { records[i][k] = patch[k]; });
+        /* Put the record back in the queue. Without this a change made after the
+           first sync never leaves the laptop, which silently lost the booking
+           outcome for every visitor whose record synced before they chose. The
+           POST is an upsert keyed on id, so the row is overwritten, not doubled. */
+        records[i].synced_at = null;
         break;
       }
     }

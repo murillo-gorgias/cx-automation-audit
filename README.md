@@ -58,6 +58,23 @@ Edit `js/config.js` — it is the only file that needs changing.
 | `bookingUtm.utm_campaign` | Placeholder until Angelo sends the real values (open question 3). |
 | `standNumber` | Shown on the closing screen. |
 
+## The Supabase table
+
+`supabase/schema.sql` creates both tables and the rules around them. Paste the whole
+file into the Supabase SQL editor once, after the project finishes building.
+
+Two things about it are deliberate. **Row Level Security is on**, because the key the
+app carries is published in a public repository: the rules let that key add an audit
+and come back to set the booking outcome, and nothing else. It cannot read a single
+lead. **Reading is left to signed-in Supabase users**, which is how Angelo gets them.
+
+Pick a **European region** when creating the project. Visitors hand over a name and a
+work email in the EU, the consent screen promises GDPR handling, and the region cannot
+be changed afterwards.
+
+The database password is not used by this app at all. It is for connecting to Postgres
+directly. Keep it in 1Password, never in this repo.
+
 ## Running it
 
 | | |
