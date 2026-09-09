@@ -1,0 +1,209 @@
+/* The staff screens: the PIN, and the admin panel behind it (ADR-0003, ADR-0005).
+   Answers one question at a glance from two metres: is anything stuck? */
+
+window.CXA = window.CXA || {};
+
+CXA.admin = (function () {
+
+  var el = function (h) { return CXA.screens.el(h); };
+  var esc = function (s) { return CXA.screens.esc(s); };
+
+  /* ---------------- PIN ---------------- */
+
+  function pin(handlers) {
+    var p = CXA.content.pin;
+    var entered = '';
+
+    var node = el(
+      '<section class="screen" id="screen-pin">' +
+        '<div class="frame"><div class="card modal">' +
+          '<span class="mono">' + esc(p.label) + '</span>' +
+          '<h2 class="h3">' + esc(p.title) + '</h2>' +
+          '<div class="pin-boxes"><b></b><b></b><b></b><b></b></div>' +
+          '<p class="pin-err"></p>' +
+          '<p class="lead" style="font-size:var(--text-small)">' + esc(p.hint) + '</p>' +
+          '<button class="btn btn--secondary" id="pin-back" type="button">' + esc(p.back) + '</button>' +
+        '</div></div>' +
+      '</section>'
+    );
+
+    var boxes = node.querySelectorAll('.pin-boxes b');
+    var wrap = node.querySelector('.pin-boxes');
+    var err = node.querySelector('.pin-err');
+
+    function paint() {
+      boxes.forEach(function (b, i) {
+        b.classList.toggle('is-filled', i < entered.length);
+        b.classList.toggle('is-cur', i === entered.length);
+        b.innerHTML = i < entered.length ? '<i></i>' : '';
+      });
+    }
+    paint();
+
+    function onKey(e) {
+      if (e.key === 'Escape') return handlers.cancel();
+      if (e.key === 'Backspace') {
+        entered = entered.slice(0, -1);
+        wrap.classList.remove('is-bad'); err.textContent = '';
+        return paint();
+      }
+      if (!/^[0-9]$/.test(e.key) || entered.length >= 4) return;
+
+      entered += e.key;
+      paint();
+
+      if (entered.length === 4) {
+        if (entered === CXA.config.pin) {
+          handlers.ok();
+        } else {
+          /* No lockout. What is behind this screen is the same data already on
+             the laptop, and stranding staff mid-conversation is the worse
+             failure (ADR-0014). */
+          wrap.classList.add('is-bad');
+          err.textContent = p.error;
+          entered = '';
+          setTimeout(paint, 60);
+        }
+      }
+    }
+
+    node._onKey = onKey;
+    document.addEventListener('keydown', onKey);
+    node.querySelector('#pin-back').addEventListener('click', handlers.cancel);
+    return node;
+  }
+
+  function teardownPin(node) {
+    if (node && node._onKey) document.removeEventListener('keydown', node._onKey);
+  }
+
+  /* ---------------- admin panel ---------------- */
+
+  function panel(handlers) {
+    var node = el(
+      '<section class="screen" id="screen-admin">' +
+        '<div class="frame"><div class="inner">' +
+          '<div class="a-head">' +
+            '<span class="mono">Audit admin</span>' +
+            '<span class="who"></span>' +
+          '</div>' +
+          '<div class="a-tiles">' +
+            '<div class="card a-tile" data-tile="synced">' +
+              '<span class="k">Synced to Supabase</span><span class="v">0</span>' +
+              '<span class="pill pill--ok"><s></s>All caught up</span>' +
+            '</div>' +
+            '<div class="card a-tile" data-tile="unsynced">' +
+              '<span class="k">Waiting to sync</span><span class="v">0</span>' +
+              '<span class="pill pill--ok"><s></s>Nothing queued</span>' +
+            '</div>' +
+            '<div class="card a-tile" data-tile="csv">' +
+              '<span class="k">CSV on this laptop</span><span class="v is-word">Not set up</span>' +
+              '<span class="pill pill--warn"><s></s>Choose a file</span>' +
+            '</div>' +
+          '</div>' +
+          '<div class="a-acts">' +
+            '<button class="btn" id="a-sync" type="button">Sync now</button>' +
+            '<button class="btn btn--secondary" id="a-csv" type="button">Connect the CSV</button>' +
+            '<button class="btn btn--secondary" id="a-export" type="button">Export a copy</button>' +
+            '<button class="btn btn--secondary" id="a-close" type="button">Back to the audit</button>' +
+            '<span class="when"></span>' +
+          '</div>' +
+          '<div class="card a-table">' +
+            '<div class="hd"><span>Time</span><span>Name</span><span>Company</span><span>Band</span><span>Status</span></div>' +
+            '<div class="rows"></div>' +
+          '</div>' +
+        '</div></div>' +
+      '</section>'
+    );
+
+    function pill(kind, text) {
+      return '<span class="pill pill--' + kind + '"><s></s>' + esc(text) + '</span>';
+    }
+
+    function render(stats) {
+      node.querySelector('.who').textContent =
+        CXA.config.device + ' · v' + CXA.config.version + ' · ' + stats.env;
+
+      var configured = !!(CXA.config.supabase.url && CXA.config.supabase.anonKey);
+
+      var syncedTile = node.querySelector('[data-tile="synced"]');
+      syncedTile.querySelector('.v').textContent = stats.synced;
+      syncedTile.querySelector('.pill').outerHTML = stats.synced > 0
+        ? pill('ok', 'Safely off this laptop')
+        : pill(stats.total > 0 ? 'warn' : 'ok', stats.total > 0 ? 'None synced yet' : 'Nothing yet');
+
+      /* Say why nothing is moving. "Retrying" when there is no Supabase to
+         retry against is the kind of reassurance that costs a day's leads. */
+      var waitTile = node.querySelector('[data-tile="unsynced"]');
+      var waitMsg;
+      if (stats.unsynced === 0) waitMsg = pill('ok', 'Nothing queued');
+      else if (!configured)     waitMsg = pill('warn', 'Supabase not set up');
+      else if (!navigator.onLine) waitMsg = pill('warn', 'No connection');
+      else                      waitMsg = pill('warn', 'Retrying');
+      waitTile.querySelector('.v').textContent = stats.unsynced;
+      waitTile.classList.toggle('needs-attention', stats.unsynced > 0);
+      waitTile.querySelector('.pill').outerHTML = waitMsg;
+
+      var csvTile = node.querySelector('[data-tile="csv"]');
+      var csvValue = csvTile.querySelector('.v');
+      var csvMsg;
+      if (stats.csvState === 'unsupported') {
+        csvValue.textContent = 'Not available';
+        csvMsg = pill('warn', 'Use Chrome');
+      } else if (!stats.csvName) {
+        csvValue.textContent = 'Not set up';
+        csvMsg = pill('warn', 'Choose a file');
+      } else if (stats.csvState === 'denied') {
+        csvValue.textContent = stats.csvName;
+        csvMsg = pill('warn', 'Permission refused');
+      } else {
+        csvValue.textContent = stats.csvName;
+        csvMsg = pill('ok', 'Writing · ' + stats.total + ' row' + (stats.total === 1 ? '' : 's'));
+      }
+      csvTile.classList.toggle('needs-attention', stats.csvState !== 'ready');
+      csvTile.querySelector('.pill').outerHTML = csvMsg;
+
+      node.querySelector('.when').textContent = stats.lastSyncAt
+        ? 'Last successful sync: ' + new Date(stats.lastSyncAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        : 'No successful sync yet' + (CXA.config.supabase.url ? '' : ' · Supabase not configured');
+
+      var rows = CXA.store.all().slice().reverse();
+      var body = node.querySelector('.rows');
+      if (!rows.length) {
+        body.innerHTML = '<p class="a-empty">Nothing recorded yet.</p>';
+        return;
+      }
+      body.innerHTML = rows.map(function (r) {
+        var name = r.test
+          ? '<b class="muted">&mdash;</b><span class="muted">test run</span>'
+          : '<b>' + esc([r.first_name, r.last_name].filter(Boolean).join(' ') || '—') + '</b>' +
+            '<span>' + esc(r.company || '—') + '</span>';
+        var status = r.synced_at
+          ? pill('ok', r.test ? 'Test · synced' : 'Synced')
+          : pill('warn', r.test ? 'Test · waiting' : 'Waiting');
+        return '<div class="tr' + (r.test ? ' is-test' : '') + '">' +
+          '<time>' + new Date(r.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + '</time>' +
+          name +
+          '<span>' + esc(r.score_band || '—') + '</span>' +
+          status +
+        '</div>';
+      }).join('');
+    }
+
+    node.querySelector('#a-sync').addEventListener('click', function () {
+      CXA.store.sync().catch(function (e) { alert('Sync failed: ' + e.message); });
+    });
+    node.querySelector('#a-csv').addEventListener('click', function () {
+      CXA.store.chooseCsv().catch(function (e) { alert(e.message); });
+    });
+    node.querySelector('#a-export').addEventListener('click', CXA.store.downloadCsv);
+    node.querySelector('#a-close').addEventListener('click', handlers.close);
+
+    node._render = render;
+    render(CXA.store.stats());
+    CXA.store.onChange(render);
+    return node;
+  }
+
+  return { pin: pin, teardownPin: teardownPin, panel: panel };
+})();
