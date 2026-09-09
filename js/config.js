@@ -16,7 +16,7 @@ CXA.config = {
      browser storage, which is the point: copying this folder to a second machine
      does not carry the name with it, so each one gets named once and stays named.
      The value below is only what shows before anybody names it. */
-  deviceDefault: 'unnamed-macbook',
+  deviceDefault: 'unnamed-device',
 
   get device() {
     try { return localStorage.getItem('cxa.device') || this.deviceDefault; }

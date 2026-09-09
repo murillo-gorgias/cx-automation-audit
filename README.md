@@ -34,7 +34,7 @@ Do this on each machine, ideally the day before.
 7. **Full screen: `⌃⌘F`.** Hides the address bar and the tabs.
 8. Turn off sleep and notifications for the day.
 
-Whoever runs the booth does not need this file. **"What is all this?" in the admin
+Whoever runs the booth does not need this file. **Help, top right of the admin
 panel** explains the CSV, both buttons and Chrome's permission box in plain words.
 
 Confirm it works with the wifi switched off before you trust it.

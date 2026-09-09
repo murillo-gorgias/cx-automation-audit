@@ -8,6 +8,18 @@ CXA.admin = (function () {
   var el = function (h) { return CXA.screens.el(h); };
   var esc = function (s) { return CXA.screens.esc(s); };
 
+  /* Drawn inline. Nothing on this page may reach for a CDN (ADR-0011). */
+  var ICON_BACK =
+    '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true">' +
+      '<path d="M13 8H3.5M7.5 3.5 3 8l4.5 4.5" stroke="currentColor" stroke-width="1.5" ' +
+        'stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  var ICON_HELP =
+    '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true">' +
+      '<circle cx="8" cy="8" r="6.25" stroke="currentColor" stroke-width="1.5"/>' +
+      '<path d="M6.25 6.15a1.75 1.75 0 1 1 2.15 1.9c-.42.14-.55.42-.55.79v.35" ' +
+        'stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>' +
+      '<circle cx="8" cy="11.5" r=".9" fill="currentColor"/></svg>';
+
   /* ---------------- PIN ---------------- */
 
   function pin(handlers) {
@@ -84,6 +96,8 @@ CXA.admin = (function () {
       '<section class="screen" id="screen-admin">' +
         '<div class="frame"><div class="inner">' +
           '<div class="a-head">' +
+            '<button class="btn btn--secondary btn--icon" id="a-close" type="button">' +
+              ICON_BACK + 'Back to the audit</button>' +
             '<span class="mono">Audit admin</span>' +
             '<div class="a-name">' +
               '<label class="k" for="a-device">This laptop</label>' +
@@ -92,6 +106,8 @@ CXA.admin = (function () {
               '<span class="a-saved" hidden>Saved</span>' +
             '</div>' +
             '<span class="who"></span>' +
+            '<button class="btn btn--secondary btn--icon" id="a-help" type="button">' +
+              ICON_HELP + 'Help</button>' +
           '</div>' +
           '<div class="a-tiles">' +
             '<div class="card a-tile" data-tile="synced">' +
@@ -111,8 +127,6 @@ CXA.admin = (function () {
             '<button class="btn" id="a-sync" type="button">Sync now</button>' +
             '<button class="btn btn--secondary" id="a-csv" type="button">Connect the CSV</button>' +
             '<button class="btn btn--secondary" id="a-export" type="button">Export a copy</button>' +
-            '<button class="btn btn--secondary" id="a-help" type="button">What is all this?</button>' +
-            '<button class="btn btn--secondary" id="a-close" type="button">Back to the audit</button>' +
             '<span class="when"></span>' +
           '</div>' +
           '<div class="card a-table">' +
@@ -253,8 +267,9 @@ CXA.admin = (function () {
       '<section class="screen" id="screen-help">' +
         '<div class="frame"><div class="inner">' +
           '<div class="a-head">' +
+            '<button class="btn btn--secondary btn--icon" id="h-back" type="button">' +
+              ICON_BACK + esc(h.back) + '</button>' +
             '<span class="mono">' + esc(h.label) + '</span>' +
-            '<button class="btn btn--secondary" id="h-back" type="button">' + esc(h.back) + '</button>' +
           '</div>' +
           '<h2 class="h3">' + esc(h.title) + '</h2>' +
           '<div class="h-body">' + blocks + '</div>' +

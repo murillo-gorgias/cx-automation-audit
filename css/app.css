@@ -82,6 +82,8 @@ input { font:inherit; color:inherit }
 }
 .btn--lg { height:auto; padding:16px 48px; font-size:var(--text-large); font-weight:600 }
 .btn--block { width:100% }
+.btn--icon { gap:8px }
+.btn--icon svg { width:16px; height:16px; flex:none; display:block }
 
 .card {
   background:var(--surface-light);
@@ -286,12 +288,12 @@ input { font:inherit; color:inherit }
 #screen-admin, #screen-help { background:#F8F5F1; z-index:11 }
 #screen-admin .frame { padding:44px 56px 40px; align-items:stretch; justify-content:flex-start; gap:26px }
 #screen-admin .inner { max-width:none; flex-direction:column; gap:26px }
-.a-head { display:flex; align-items:baseline; justify-content:space-between; gap:24px }
-.a-head .who { font-family:var(--font-mono); font-size:var(--text-tiny); font-weight:500;
+.a-head { display:flex; align-items:center; gap:20px }
+.a-head .who { margin-left:auto; font-family:var(--font-mono); font-size:var(--text-tiny); font-weight:500;
   letter-spacing:var(--mono-tracking); text-transform:uppercase; color:var(--content-faded) }
 /* Naming the laptop. It sits in the head because it belongs with the identity
    line beside it, not with the buttons that act on the day's records. */
-.a-name { display:flex; align-items:center; gap:12px; margin-right:auto; padding-left:32px }
+.a-name { display:flex; align-items:center; gap:12px }
 .a-name .k { font-family:var(--font-mono); font-size:var(--text-tiny); font-weight:500;
   letter-spacing:var(--mono-tracking); text-transform:uppercase; color:var(--content-secondary) }
 .a-name input {
@@ -307,7 +309,8 @@ input { font:inherit; color:inherit }
 /* ---------- staff help ---------- */
 #screen-help .frame { padding:44px 56px 40px; align-items:stretch; justify-content:flex-start; gap:22px }
 #screen-help .inner { max-width:none; flex-direction:column; gap:22px }
-#screen-help .a-head { align-items:center }
+#screen-help .a-head { align-items:center; gap:20px }
+#screen-help .a-head .mono { margin-right:auto }
 .h-body {
   flex:1; min-height:0; overflow-y:auto; padding-right:8px;
   columns:2; column-gap:48px;
