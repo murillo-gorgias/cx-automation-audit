@@ -39,8 +39,14 @@ CXA.config = {
   get isProduction() { return this.env === 'production'; },
 
   supabase: {
-    url: '',                        // https://<project>.supabase.co
-    anonKey: '',                    // write-only anon key, RLS insert-only
+    /* The API address, not the dashboard address. It is the project reference
+       with .supabase.co after it. */
+    url: 'https://gtxdlieipcklzskjrzjz.supabase.co',
+    /* The anon key, and only ever the anon key. It is public by design and the
+       rules in supabase/schema.sql are what make that safe: it may add an audit
+       and set the booking outcome, and it can read nothing. The service_role
+       key ignores those rules and must never appear in this file. */
+    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd0eGRsaWVpcGNrbHpza2pyemp6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg5ODU5MjcsImV4cCI6MjEwNDU2MTkyN30.O-WCRFwwiSrq_noTHuGiSRdie0Y_YUqy_b6moZuWox0',
     table: 'audits',                // production
     devTable: 'audits_dev'          // anything not opened from file://
   },
