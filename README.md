@@ -5,6 +5,11 @@ handful of questions about their support setup and gets a readout on the spot: a
 automation readiness band, plus estimated annual savings and revenue upside on Gorgias.
 It doubles as lead capture.
 
+**Live: [https://murillo-gorgias.github.io/cx-automation-audit/](https://murillo-gorgias.github.io/cx-automation-audit/)**
+
+That link is the **dev environment**. It runs over https, so the app writes to the dev
+table and marks itself on screen. The real booth machines run the same files from disk.
+
 Plain HTML, CSS and JavaScript. No build step, no package manager, no framework.
 Open `index.html` and it runs.
 
