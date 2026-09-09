@@ -220,10 +220,20 @@ CXA.app = (function () {
 
   function closeMenu() { menu.classList.remove('is-active'); menu.innerHTML = ''; }
 
+  function showAdmin() {
+    mount(CXA.admin.panel({ close: showSplash, help: showHelp }), 'admin');
+  }
+
+  /* Plain-language notes on the CSV and the buttons around it, for whoever is
+     holding the laptop on the day. Behind the PIN, so a visitor never lands on it. */
+  function showHelp() {
+    mount(CXA.admin.help({ back: showAdmin }), 'help');
+  }
+
   function showPin() {
     returnFrom = currentName;
     mount(CXA.admin.pin({
-      ok: function () { mount(CXA.admin.panel({ close: showSplash }), 'admin'); },
+      ok: showAdmin,
       cancel: function () { showSplash(); }
     }), 'pin');
   }
@@ -235,7 +245,7 @@ CXA.app = (function () {
     if (name === 'contact') return c.form;
     if (name === 'question') return c.question;
     if (name === 'results') return c.results;
-    return 0;   // splash, thanks, pin and admin never time out
+    return 0;   // splash, thanks, pin, admin and help never time out
   }
 
   function resetIdle() {

@@ -21,15 +21,21 @@ Do this on each machine, ideally the day before.
 2. **Open `index.html` in Chrome.** Chrome, not Safari — Safari refuses to store
    anything on a `file://` page, and that is where the day's leads sit before they
    sync (ADR-0011).
-3. **Open the staff menu** — the small round control at the bottom left — then
+3. **Open the staff menu**, the small round control at the bottom left, then
    **Settings**, and enter the PIN.
-4. **Click "Connect the CSV"** and save the file somewhere you will find it again.
+4. **Name this laptop** in the box at the top, e.g. `theo-macbook`, and press Enter.
+   The name goes on every record and is stored on this machine only, so copying
+   the folder elsewhere does not carry it over. Name each laptop once.
+5. **Click "Connect the CSV"** and save the file somewhere you will find it again.
    Chrome asks to allow editing **once per launch**; click Allow. If somebody
    dismisses that prompt the CSV stops updating for that run, and the admin panel
    says so.
-5. **Check the three tiles are green**, then click Back to the audit.
-6. **Full screen: `⌃⌘F`.** Hides the address bar and the tabs.
-7. Turn off sleep and notifications for the day.
+6. **Check the three tiles are green**, then click Back to the audit.
+7. **Full screen: `⌃⌘F`.** Hides the address bar and the tabs.
+8. Turn off sleep and notifications for the day.
+
+Whoever runs the booth does not need this file. **"What is all this?" in the admin
+panel** explains the CSV, both buttons and Chrome's permission box in plain words.
 
 Confirm it works with the wifi switched off before you trust it.
 
@@ -39,7 +45,7 @@ Edit `js/config.js` — it is the only file that needs changing.
 
 | Setting | |
 |---|---|
-| `device` | Name this laptop, e.g. `theo-macbook`. It lands on every record so two machines can be told apart afterwards. |
+| `deviceDefault` | Leave it. The real name is set per laptop **in the admin panel**, not here, and is kept in that machine's own browser storage. This is only what shows before anyone names it. |
 | `supabase.url` / `anonKey` | The project and its write-only anon key. **Until these are filled in the app stores everything locally and syncs nothing** — the admin panel says "Supabase not set up". |
 | `pin` | Change it from the default. Put it in the setup guide, never in this repo. |
 | `bookingUtm.utm_campaign` | Placeholder until Angelo sends the real values (open question 3). |

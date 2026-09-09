@@ -85,6 +85,12 @@ CXA.admin = (function () {
         '<div class="frame"><div class="inner">' +
           '<div class="a-head">' +
             '<span class="mono">Audit admin</span>' +
+            '<div class="a-name">' +
+              '<label class="k" for="a-device">This laptop</label>' +
+              '<input id="a-device" type="text" maxlength="40" spellcheck="false" ' +
+                'autocomplete="off" placeholder="' + esc(CXA.config.deviceDefault) + '">' +
+              '<span class="a-saved" hidden>Saved</span>' +
+            '</div>' +
             '<span class="who"></span>' +
           '</div>' +
           '<div class="a-tiles">' +
@@ -105,6 +111,7 @@ CXA.admin = (function () {
             '<button class="btn" id="a-sync" type="button">Sync now</button>' +
             '<button class="btn btn--secondary" id="a-csv" type="button">Connect the CSV</button>' +
             '<button class="btn btn--secondary" id="a-export" type="button">Export a copy</button>' +
+            '<button class="btn btn--secondary" id="a-help" type="button">What is all this?</button>' +
             '<button class="btn btn--secondary" id="a-close" type="button">Back to the audit</button>' +
             '<span class="when"></span>' +
           '</div>' +
@@ -120,9 +127,18 @@ CXA.admin = (function () {
       return '<span class="pill pill--' + kind + '"><s></s>' + esc(text) + '</span>';
     }
 
+    var deviceInput = node.querySelector('#a-device');
+    var savedFlag = node.querySelector('.a-saved');
+
     function render(stats) {
       node.querySelector('.who').textContent =
         CXA.config.device + ' · v' + CXA.config.version + ' · ' + stats.env;
+
+      /* Do not fight someone who is mid-edit. */
+      if (document.activeElement !== deviceInput) {
+        var stored = CXA.config.device;
+        deviceInput.value = stored === CXA.config.deviceDefault ? '' : stored;
+      }
 
       var configured = !!(CXA.config.supabase.url && CXA.config.supabase.anonKey);
 
@@ -197,7 +213,23 @@ CXA.admin = (function () {
       CXA.store.chooseCsv().catch(function (e) { alert(e.message); });
     });
     node.querySelector('#a-export').addEventListener('click', CXA.store.downloadCsv);
+    node.querySelector('#a-help').addEventListener('click', handlers.help);
     node.querySelector('#a-close').addEventListener('click', handlers.close);
+
+    /* The name is saved on this laptop, so it survives a reload and does not
+       travel when the folder is copied to another machine. */
+    var savedTimer = null;
+    function saveDevice() {
+      CXA.config.setDevice(deviceInput.value);
+      render(CXA.store.stats());
+      savedFlag.hidden = false;
+      clearTimeout(savedTimer);
+      savedTimer = setTimeout(function () { savedFlag.hidden = true; }, 1600);
+    }
+    deviceInput.addEventListener('change', saveDevice);
+    deviceInput.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') { e.preventDefault(); deviceInput.blur(); }
+    });
 
     node._render = render;
     render(CXA.store.stats());
@@ -205,5 +237,34 @@ CXA.admin = (function () {
     return node;
   }
 
-  return { pin: pin, teardownPin: teardownPin, panel: panel };
+  /* ---------------- staff help ---------------- */
+
+  function help(handlers) {
+    var h = CXA.content.help;
+
+    var blocks = h.blocks.map(function (b) {
+      return '<section class="h-block">' +
+        '<h3>' + esc(b.h) + '</h3>' +
+        b.p.map(function (line) { return '<p>' + esc(line) + '</p>'; }).join('') +
+      '</section>';
+    }).join('');
+
+    var node = el(
+      '<section class="screen" id="screen-help">' +
+        '<div class="frame"><div class="inner">' +
+          '<div class="a-head">' +
+            '<span class="mono">' + esc(h.label) + '</span>' +
+            '<button class="btn btn--secondary" id="h-back" type="button">' + esc(h.back) + '</button>' +
+          '</div>' +
+          '<h2 class="h3">' + esc(h.title) + '</h2>' +
+          '<div class="h-body">' + blocks + '</div>' +
+        '</div></div>' +
+      '</section>'
+    );
+
+    node.querySelector('#h-back').addEventListener('click', handlers.back);
+    return node;
+  }
+
+  return { pin: pin, teardownPin: teardownPin, panel: panel, help: help };
 })();

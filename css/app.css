@@ -252,7 +252,7 @@ input { font:inherit; color:inherit }
 
 /* ---------- overlays: staff menu, idle, pin ---------- */
 .overlay { position:absolute; inset:0; z-index:10; display:none; background:rgba(27,26,25,.32) }
-#screen-pin, #screen-admin { position:absolute; inset:0 }
+#screen-pin, #screen-admin, #screen-help { position:absolute; inset:0 }
 .overlay.is-active { display:flex }
 
 #staff-menu { align-items:flex-end; justify-content:flex-start;
@@ -283,12 +283,41 @@ input { font:inherit; color:inherit }
 .pin-err { font-size:var(--text-regular); color:var(--state-error); font-weight:600; min-height:24px }
 
 /* ---------- admin ---------- */
-#screen-admin { background:#F8F5F1; z-index:11 }
+#screen-admin, #screen-help { background:#F8F5F1; z-index:11 }
 #screen-admin .frame { padding:44px 56px 40px; align-items:stretch; justify-content:flex-start; gap:26px }
 #screen-admin .inner { max-width:none; flex-direction:column; gap:26px }
 .a-head { display:flex; align-items:baseline; justify-content:space-between; gap:24px }
 .a-head .who { font-family:var(--font-mono); font-size:var(--text-tiny); font-weight:500;
   letter-spacing:var(--mono-tracking); text-transform:uppercase; color:var(--content-faded) }
+/* Naming the laptop. It sits in the head because it belongs with the identity
+   line beside it, not with the buttons that act on the day's records. */
+.a-name { display:flex; align-items:center; gap:12px; margin-right:auto; padding-left:32px }
+.a-name .k { font-family:var(--font-mono); font-size:var(--text-tiny); font-weight:500;
+  letter-spacing:var(--mono-tracking); text-transform:uppercase; color:var(--content-secondary) }
+.a-name input {
+  width:230px; padding:8px 12px; border-radius:var(--radius-full);
+  border:1px solid var(--border-bold); background:var(--surface-light);
+  font-size:var(--text-small); line-height:1.5; color:var(--content-primary);
+}
+.a-name input::placeholder { color:var(--content-faded) }
+.a-name input:focus { outline:none; border-color:var(--content-primary) }
+.a-saved { font-family:var(--font-mono); font-size:var(--text-tiny); font-weight:500;
+  letter-spacing:var(--mono-tracking); text-transform:uppercase; color:var(--state-ok) }
+
+/* ---------- staff help ---------- */
+#screen-help .frame { padding:44px 56px 40px; align-items:stretch; justify-content:flex-start; gap:22px }
+#screen-help .inner { max-width:none; flex-direction:column; gap:22px }
+#screen-help .a-head { align-items:center }
+.h-body {
+  flex:1; min-height:0; overflow-y:auto; padding-right:8px;
+  columns:2; column-gap:48px;
+}
+.h-block { break-inside:avoid; margin-bottom:26px }
+.h-block h3 { font-family:var(--font-display); font-weight:400; font-size:var(--heading-5);
+  line-height:1.25; color:var(--content-primary); margin-bottom:10px }
+.h-block p { font-size:var(--text-regular); line-height:1.6; color:var(--content-secondary) }
+.h-block p + p { margin-top:8px }
+
 .a-tiles { display:grid; grid-template-columns:repeat(3,1fr); gap:18px }
 .a-tile { padding:24px 26px; display:flex; flex-direction:column; gap:10px }
 .a-tile .k { font-family:var(--font-mono); font-size:var(--text-tiny); font-weight:500;

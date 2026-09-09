@@ -9,9 +9,29 @@ window.CXA = window.CXA || {};
 CXA.config = {
   version: '1.0.0',
 
-  /* Which laptop this is. Shows in the admin panel and on every record, so two
-     machines can be told apart when reconciling after the event. */
-  device: 'unnamed-macbook',
+  /* Which laptop this is. Goes on every record, so two machines can be told
+     apart when reconciling after the event.
+
+     Set it in the admin panel, not here. The name is kept in this laptop's own
+     browser storage, which is the point: copying this folder to a second machine
+     does not carry the name with it, so each one gets named once and stays named.
+     The value below is only what shows before anybody names it. */
+  deviceDefault: 'unnamed-macbook',
+
+  get device() {
+    try { return localStorage.getItem('cxa.device') || this.deviceDefault; }
+    catch (e) { return this.deviceDefault; }
+  },
+
+  /* Empty clears the name and falls back to the default. */
+  setDevice: function (name) {
+    var clean = String(name == null ? '' : name).trim().slice(0, 40);
+    try {
+      if (clean) localStorage.setItem('cxa.device', clean);
+      else localStorage.removeItem('cxa.device');
+    } catch (e) { /* storage blocked; the name just will not stick */ }
+    return CXA.config.device;
+  },
 
   /* Production is the folder of files opened from disk; anything served over
      http(s) is the dev environment and writes to the dev table (ADR-0011). */

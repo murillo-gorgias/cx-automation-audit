@@ -210,6 +210,59 @@ CXA.content = {
     settingsTag: 'PIN'
   },
 
+  /* The staff help screen, reached from the admin panel. Written for whoever is
+     holding the laptop on the day, who may never have seen this app before. */
+  help: {
+    label: 'Staff only',
+    title: 'The file on this laptop',
+    back: 'Back to the admin panel',
+    blocks: [
+      {
+        h: 'What the CSV is',
+        p: [
+          'A spreadsheet of everyone who finished the audit on this laptop. Open it in Excel or Numbers whenever you want to see the day so far.',
+          'It is the safety net, not the real list. The real list is the one the app sends to our database over wifi. The file sits here so that a bad connection at the stand can never cost us a day of leads.'
+        ]
+      },
+      {
+        h: 'Naming this laptop',
+        p: [
+          'Type a name in the box at the top of the admin panel, something like theo-macbook. Press Enter and it saves.',
+          'The name goes on every record. If two laptops are running the audit, it is how we tell afterwards which leads came from which one. The name stays on this laptop. Copying the folder to another machine does not copy the name with it.'
+        ]
+      },
+      {
+        h: 'The "Connect the CSV" button',
+        p: [
+          'Press it once on each laptop, before the event starts. It asks where to save the file and what to call it. The Desktop is the easiest place to find again.',
+          'After that the app keeps that same file up to date on its own, rewriting it every time someone finishes. You never need to press the button again unless you want to start a different file.'
+        ]
+      },
+      {
+        h: 'The permission box Chrome shows',
+        p: [
+          'The first time you open the app each day, Chrome asks whether it can save changes to the file you picked. Click Allow.',
+          'Chrome asks once every time it starts up. It is asking about the one file you chose and nothing else.',
+          'If the box gets closed or dismissed, the app cannot update the file, and the CSV tile in the admin panel turns orange and says the permission was refused. Nothing is lost: everything is still on the laptop. Quit Chrome, open the app again, and click Allow. The next write catches up every row that was missed.'
+        ]
+      },
+      {
+        h: 'The "Export a copy" button',
+        p: [
+          'Sends a fresh copy of the list to your Downloads folder. It is a snapshot of this moment.',
+          'It does not replace the connected file and it does not keep itself up to date. Use it if somebody wants the numbers there and then, or if something went wrong with the connected file.'
+        ]
+      },
+      {
+        h: 'If a tile looks wrong',
+        p: [
+          'The three tiles at the top of the admin panel say where the day\u2019s records are. Green is fine. Orange needs a look, and the tile says what is wrong.',
+          'Nothing is ever deleted from this laptop. An orange tile means something is delayed, not that anything has gone missing.'
+        ]
+      }
+    ]
+  },
+
   pin: {
     label: 'Staff only',
     title: 'Enter the PIN',
