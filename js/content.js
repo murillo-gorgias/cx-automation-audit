@@ -1,6 +1,6 @@
 /* Every word the visitor sees, and every number behind a banded answer.
    This is the file to hand to Alana or Theo for a copy pass — nothing here
-   needs a developer. Mirrors docs/copy.md.
+   needs a developer. Mirrors the project copy deck.
 
    Band values come from ADR-0009. Changing a label is safe; changing a value
    changes the maths. */

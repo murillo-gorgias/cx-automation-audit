@@ -1,7 +1,7 @@
 /* The ROI maths, ported from the live Gorgias calculator (ADR-0008).
    Pure arithmetic: answers in, numbers out. No DOM, no state.
 
-   Verified against the four QA scenarios in docs/spec.md section 7. It also
+   Verified against the four QA scenarios in the build spec, section 7. It also
    reproduces the two Shopping Assistant figures the spec quotes by hand —
    $90/yr at the smallest band and $1,162/yr at the second. */
 
