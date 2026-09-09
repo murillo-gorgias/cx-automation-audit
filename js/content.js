@@ -18,15 +18,15 @@ CXA.content = {
     statIntervalMs: 5000,
     stats: [
       { eyebrow: 'Everyday tickets',           figure: '45', unit: '%', caption: 'of routine support tickets handled by the AI Agent, with no one touching them.' },
-      { eyebrow: '3,000 tickets a month',      figure: '$106,630', unit: '', caption: 'taken off a five-person support team’s annual cost.' },
+      { eyebrow: '3,000 tickets a month',      figure: '$106K', unit: '', caption: 'taken off a five-person support team’s annual cost.' },
       { eyebrow: 'The tickets a human keeps',  figure: '25', unit: '%', caption: 'faster to resolve, because the agent opens with the context already gathered.' },
-      { eyebrow: '30,000 tickets a month',     figure: '$600,900', unit: '', caption: 'saved a year at the top end of what we see on the floor.' }
+      { eyebrow: '30,000 tickets a month',     figure: '$600K', unit: '', caption: 'saved a year by the biggest support teams we run.' }
     ]
   },
 
   contact: {
     title: 'Who are we running this for?',
-    subtitle: 'The audit results goes to your email.',
+    subtitle: 'Your result goes to your email.',
     fields: [
       { name: 'first_name', label: 'First name', placeholder: 'Julien',                required: true },
       { name: 'last_name',  label: 'Last name',  placeholder: 'Wilson',                required: true },
@@ -38,7 +38,7 @@ CXA.content = {
     /* PLACEHOLDER until Legal approves the wording and gives us a retention
        period and a contact address (open question 5). */
     gdprTitle: 'Your data is protected under GDPR.',
-    gdprBody: 'Gorgias collects your name, work email, company and today’s answers to produce your audit result and to follow up with you — nothing else. We never sell it and we never share it outside Gorgias. We delete it after [retention period], and you can ask to see, correct or delete it at any time by writing to [privacy contact]. Full detail at gorgias.com/privacy.',
+    gdprBody: 'Gorgias collects your name, work email, company and today’s answers to produce your audit result and to follow up with you, nothing else. We never sell it and we never share it outside Gorgias. We delete it after [retention period], and you can ask to see, correct or delete it at any time by writing to [privacy contact]. Full detail at gorgias.com/privacy.',
     cta: 'Continue',
     errors: {
       required: 'Add your %s to carry on.',
@@ -159,11 +159,11 @@ CXA.content = {
     },
     savedKey: 'Support cost saved',
     revenueKey: 'Revenue added',
-    revenueLockedKey: 'Revenue — once you’re on Shopify',
+    revenueLockedKey: 'Revenue, once you’re on Shopify',
     returnKey: 'Return on spend',
     /* Shown instead of the revenue figure when attributed orders round below
        one a month (open question 4). */
-    revenueSuppressed: 'Your traffic is below where Shopping Assistant starts to move the needle. The saving is the whole picture today.',
+    revenueSuppressed: 'Your traffic is below the point where Shopping Assistant starts to add orders. The saving is the whole picture today.',
     bands: {
       'Reactive':          'Your team is still doing this manually. There are a lot of quick wins on the table.',
       'Getting there':     'You’ve started automating. Here’s what’s still costing you time.',
@@ -186,15 +186,14 @@ CXA.content = {
     benchmarkKey: 'Against the ecommerce average',
     benchmark: 'You handle <b>%tickets% tickets a month with %agents% people</b>. The ecommerce average is closer to <b>5,000 with 6</b>.',
     book: 'Book 15 minutes now',
-    bookUnder: 'With Theo, who runs this at Gorgias.',
-    bookOffline: 'Book 15 minutes — we’ll set it up',
-    bookOfflineUnder: 'The wifi is down at the stand. We’ve noted that you want a slot and Theo will be in touch first thing.',
+    bookOffline: 'Book 15 minutes, we’ll set it up',
+    bookOfflineUnder: 'The wifi is down at the stand. We have your request and someone will be in touch first thing.',
     followUp: 'Send it to me and follow up later'
   },
 
   thanks: {
     title: 'Thanks, %s.',
-    body: 'Theo has your numbers. Grab a coffee — we’re on stand %s all day.'
+    body: 'Your numbers are with the Gorgias team. Grab a coffee, we’re on stand %s all day.'
   },
 
   idle: {

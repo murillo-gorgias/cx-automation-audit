@@ -42,7 +42,7 @@ CXA.screens = (function () {
       '<section class="screen" id="screen-splash">' +
         '<div class="panel"><div class="dark"></div></div>' +
         orbit() +
-        '<div class="frame"><div class="inner cols">' +
+        '<div class="frame"><div class="inner inner--wide cols">' +
           '<div class="left">' +
             '<img class="logo" src="assets/img/logo.svg" alt="Gorgias">' +
             '<div class="hero">' +
@@ -214,6 +214,17 @@ CXA.screens = (function () {
     }
     refresh();
 
+    /* A single-choice answer moves on by itself after a moment. Pressing
+       Continue inside that moment used to fire the move twice and jump a
+       question, which left the results screen with a missing answer and no
+       way forward. The first move wins and the rest are ignored. */
+    var moved = false;
+    function advance(answer) {
+      if (moved) return;
+      moved = true;
+      handlers.next(answer);
+    }
+
     node.querySelectorAll('.option').forEach(function (btn) {
       btn.addEventListener('click', function () {
         var option = q.options[Number(btn.dataset.index)];
@@ -230,12 +241,12 @@ CXA.screens = (function () {
           refresh();
           /* One tap, one answer, straight on — the AE never reaches for Continue
              on a single-choice question. */
-          setTimeout(function () { handlers.next(chosen); }, 180);
+          setTimeout(function () { advance(chosen); }, 180);
         }
       });
     });
 
-    next.addEventListener('click', function () { handlers.next(chosen); });
+    next.addEventListener('click', function () { advance(chosen); });
     node.querySelector('#q-back').addEventListener('click', handlers.back);
     node.querySelector('#staff-open').addEventListener('click', handlers.staff);
     return node;
@@ -348,7 +359,7 @@ CXA.screens = (function () {
               '<div class="r-close">' +
                 '<button class="btn btn--block" id="r-book">' +
                   esc(online ? r.book : r.bookOffline) + '</button>' +
-                '<span class="u">' + esc(online ? r.bookUnder : r.bookOfflineUnder) + '</span>' +
+                (online ? '' : '<span class="u">' + esc(r.bookOfflineUnder) + '</span>') +
                 '<button class="btn btn--secondary btn--block" id="r-later">' + esc(r.followUp) + '</button>' +
               '</div>' +
             '</div>' +

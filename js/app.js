@@ -266,12 +266,31 @@ CXA.app = (function () {
 
   function hideIdlePrompt() { idlePrompt.classList.remove('is-active'); idlePrompt.innerHTML = ''; }
 
-  /* The design is drawn at 1440x900. Scale the whole stage to whatever screen
-     it lands on rather than reflowing — a booth laptop should show the frame
-     that was designed, at every resolution it might have. */
+  /* The design is drawn at 1440x900 and the whole stage is scaled to the screen
+     rather than reflowing, so a booth laptop shows the frame that was designed.
+
+     Scaling alone letterboxes: a 16:9 screen left paper-coloured bars down the
+     sides of the splash's dark panel, which read as a bug. So after picking the
+     scale, the stage is also grown in design pixels until it covers the screen
+     exactly. Nothing is cropped and no type is resized, because the scale is
+     unchanged; the screens simply get more room, and every one of them centres
+     its content. Growth is capped so an unusually shaped window falls back to
+     letterboxing rather than stretching into a shape nobody drew. */
+  var STAGE_W = 1440, STAGE_H = 900, MAX_W = 2000, MAX_H = 1240;
+
   function fitStage() {
-    var scale = Math.min(window.innerWidth / 1440, window.innerHeight / 900);
-    document.getElementById('stage').style.setProperty('--scale', scale);
+    var flag = document.getElementById('env-flag');
+    var flagH = (flag && flag.offsetHeight && !CXA.config.isProduction) ? flag.offsetHeight : 0;
+    document.body.style.setProperty('--flag-h', flagH + 'px');
+
+    var vw = window.innerWidth;
+    var vh = Math.max(window.innerHeight - flagH, 1);
+    var scale = Math.min(vw / STAGE_W, vh / STAGE_H);
+
+    var stage = document.getElementById('stage');
+    stage.style.width  = Math.min(Math.max(Math.ceil(vw / scale), STAGE_W), MAX_W) + 'px';
+    stage.style.height = Math.min(Math.max(Math.ceil(vh / scale), STAGE_H), MAX_H) + 'px';
+    stage.style.setProperty('--scale', scale);
   }
 
   /* ---------------- boot ---------------- */
@@ -282,8 +301,7 @@ CXA.app = (function () {
     idlePrompt = document.getElementById('idle-prompt');
 
     document.body.classList.toggle('is-dev', !CXA.config.isProduction);
-    document.getElementById('env-flag').textContent =
-      'Dev build · writing to ' + CXA.config.tableName() + ' · not for the booth';
+    document.getElementById('env-flag').textContent = 'Dev build';
 
     menu.addEventListener('click', function (e) { if (e.target === menu) closeMenu(); });
 

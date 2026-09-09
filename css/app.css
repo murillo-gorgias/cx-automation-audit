@@ -19,7 +19,7 @@ body {
 /* The stage. Every screen is drawn at the Figma frame size and the whole thing
    is scaled to fit, so nothing reflows into a shape nobody designed. */
 #viewport {
-  position:fixed; inset:0; overflow:hidden;
+  position:fixed; inset:0; top:var(--flag-h, 0px); overflow:hidden;
   background:var(--surface-default);
 }
 /* Absolute + translate rather than grid centring: a grid clamps centring when
@@ -27,7 +27,7 @@ body {
    fold on any screen shorter than 900px. */
 #stage {
   position:absolute; left:50%; top:50%;
-  width:1440px; height:900px;
+  width:1440px; height:900px;   /* fitStage() grows these to cover the screen */
   transform:translate(-50%, -50%) scale(var(--scale, 1));
   transform-origin:center center;
   background:var(--surface-default);
@@ -53,6 +53,9 @@ input { font:inherit; color:inherit }
   padding:var(--frame-pad-y) var(--frame-pad-x);
 }
 .inner { width:100%; max-width:var(--container-medium); flex:1; min-height:0; display:flex }
+/* The splash's dark panel is a proportion of the stage, so its columns cannot be
+   capped at a fixed width or the text drifts off the panel on a wide screen. */
+.inner--wide { max-width:none }
 .cols { gap:var(--col-gap); align-items:center }
 .cols > * { flex:1 1 0; min-width:0 }
 
@@ -119,6 +122,7 @@ input { font:inherit; color:inherit }
   font-variant-numeric:tabular-nums;
 }
 #screen-splash .stat-figure .unit { font-size:120px }
+#screen-splash .stat-figure { white-space:nowrap; max-width:100%; overflow:hidden }
 #screen-splash .stat-caption { font-size:var(--text-large); line-height:1.5; color:var(--content-secondary-inverted) }
 #screen-splash .stat-body { transition:opacity .6s ease, transform .6s ease }
 #screen-splash .stat-body.is-out { opacity:0; transform:translateY(10px) }
@@ -133,7 +137,7 @@ input { font:inherit; color:inherit }
 #screen-contact .orbit { top:calc(50% + 649px) }
 #screen-contact .left { display:flex; flex-direction:column; gap:24px; align-self:stretch; justify-content:center }
 #screen-contact .left-hero { flex:1; display:flex; flex-direction:column; gap:24px; justify-content:center; min-height:0 }
-#screen-contact .gdpr { padding:24px; display:flex; flex-direction:column; gap:8px;
+#screen-contact .gdpr { padding:24px; margin-bottom:56px; display:flex; flex-direction:column; gap:8px;
   font-size:var(--text-tiny); line-height:1.5; color:var(--content-secondary) }
 #screen-contact .gdpr b { font-weight:600 }
 #screen-contact .right { align-self:stretch; display:flex; align-items:center; padding:10px }
