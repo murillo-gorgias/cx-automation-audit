@@ -335,9 +335,16 @@ input { font:inherit; color:inherit }
 .pill--ok { background:var(--state-ok-bg); color:#1D7A32 } .pill--ok s { background:var(--state-ok) }
 .pill--warn { background:var(--state-warn-bg); color:#A85A13 } .pill--warn s { background:var(--state-warn) }
 .a-acts { display:flex; gap:14px; align-items:center; flex-wrap:wrap }
-/* Closing sits apart from the three buttons that act on records. */
-.a-quit { margin-left:14px; color:var(--content-secondary) }
-.a-quit.is-armed { border-color:var(--state-error); color:var(--state-error); font-weight:600 }
+
+/* Closing lives at the far right of the header, past Help. Icon only until it is
+   armed, then it grows a word so nobody closes the day by mistake. */
+.btn--round { padding:8px; width:48px }
+.a-quit { color:var(--content-secondary) }
+.a-quit:hover { color:var(--content-primary) }
+.a-quit.is-armed {
+  width:auto; padding:8px 20px 8px 16px;
+  border-color:var(--state-error); color:var(--state-error); font-weight:600;
+}
 .a-quit-note { font-size:var(--text-small); line-height:1.5; color:var(--state-error) }
 .a-acts .when { font-size:var(--text-small); color:var(--content-secondary); margin-left:auto }
 .a-table { overflow:hidden; flex:1; min-height:0; display:flex; flex-direction:column }

@@ -18,7 +18,7 @@ Open `index.html` and it runs.
 Do this on each machine, ideally the day before.
 
 1. **Copy this whole folder** to the laptop. The Desktop is easiest.
-2. **Double-click `Open the Audit`.** It opens the audit in Chrome with no address
+2. **Double-click `audit-tool`.** It opens the audit in Chrome with no address
    bar, no tabs and no menus, and it is how the laptop should be started every time,
    including now. It has to be Chrome: Safari refuses to store anything on a page
    opened from disk, and that is where the day's leads sit before they sync (ADR-0011).
@@ -62,7 +62,7 @@ Edit `js/config.js` — it is the only file that needs changing.
 
 | | |
 |---|---|
-| **Production** | The folder, opened from disk, normally via `Open the Audit`. Writes to the `audits` table. |
+| **Production** | The folder, opened from disk, normally via `audit-tool`. Writes to the `audits` table. |
 | **Dev** | Anything served over http(s). Writes to `audits_dev` and shows a coral bar across the top so a review can never be mistaken for a real session. |
 
 The switch is `location.protocol === 'file:'` — nothing to remember to flip.
@@ -72,7 +72,7 @@ open `http://127.0.0.1:8000`.
 
 ## What the launcher is
 
-`Open the Audit.app` is eight lines of shell in a folder that macOS treats as an app.
+`audit-tool.app` is eight lines of shell in a folder that macOS treats as an app.
 It starts Chrome in **app mode**, which hides the address bar, the tabs and the menus
 but keeps the ordinary window, so the red close button still works.
 

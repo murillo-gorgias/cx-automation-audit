@@ -19,6 +19,11 @@ CXA.admin = (function () {
       '<path d="M6.25 6.15a1.75 1.75 0 1 1 2.15 1.9c-.42.14-.55.42-.55.79v.35" ' +
         'stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>' +
       '<circle cx="8" cy="11.5" r=".9" fill="currentColor"/></svg>';
+  var ICON_POWER =
+    '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true">' +
+      '<path d="M8 2v6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>' +
+      '<path d="M12.1 4.4a5.75 5.75 0 1 1-8.2 0" stroke="currentColor" stroke-width="1.5" ' +
+        'stroke-linecap="round"/></svg>';
 
   /* ---------------- PIN ---------------- */
 
@@ -108,6 +113,9 @@ CXA.admin = (function () {
             '<span class="who"></span>' +
             '<button class="btn btn--secondary btn--icon" id="a-help" type="button">' +
               ICON_HELP + 'Help</button>' +
+            '<button class="btn btn--secondary btn--icon btn--round a-quit" id="a-quit" ' +
+              'type="button" title="Close the audit" aria-label="Close the audit">' +
+              ICON_POWER + '<span class="a-quit-label" hidden>Close?</span></button>' +
           '</div>' +
           '<div class="a-tiles">' +
             '<div class="card a-tile" data-tile="synced">' +
@@ -127,7 +135,6 @@ CXA.admin = (function () {
             '<button class="btn" id="a-sync" type="button">Sync now</button>' +
             '<button class="btn btn--secondary" id="a-csv" type="button">Connect the CSV</button>' +
             '<button class="btn btn--secondary" id="a-export" type="button">Export a copy</button>' +
-            '<button class="btn btn--secondary a-quit" id="a-quit" type="button">Close the audit</button>' +
             '<span class="when"></span>' +
           '</div>' +
           '<p class="a-quit-note" hidden></p>' +
@@ -249,16 +256,18 @@ CXA.admin = (function () {
     var quitArmed = false;
     var quitTimer = null;
 
+    var quitLabel = node.querySelector('.a-quit-label');
+
     function disarmQuit() {
       quitArmed = false;
-      quitBtn.textContent = 'Close the audit';
+      quitLabel.hidden = true;
       quitBtn.classList.remove('is-armed');
     }
 
     quitBtn.addEventListener('click', function () {
       if (!quitArmed) {
         quitArmed = true;
-        quitBtn.textContent = 'Close it, yes';
+        quitLabel.hidden = false;
         quitBtn.classList.add('is-armed');
         quitNote.hidden = true;
         clearTimeout(quitTimer);

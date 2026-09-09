@@ -9,7 +9,7 @@
 # normal Chrome window (the laptop's name, the connected CSV, the day's records)
 # is the same here. There is no second copy to keep straight.
 
-# This file lives in Open the Audit.app/Contents/MacOS/, so the audit folder is
+# This file lives in audit-tool.app/Contents/MacOS/, so the audit folder is
 # three levels up.
 HERE="$(cd "$(dirname "$0")/../../.." && pwd)"
 PAGE="file://$HERE/index.html"
