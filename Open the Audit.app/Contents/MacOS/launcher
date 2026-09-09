@@ -1,0 +1,29 @@
+#!/bin/bash
+# Opens the audit in Chrome with no address bar, no tabs and no menus.
+#
+# This is Chrome's app mode, not its kiosk mode. The difference matters: app
+# mode keeps the ordinary window, so the red button in the corner still closes
+# it. Kiosk mode would leave no way out but Cmd+Q.
+#
+# It uses whatever Chrome profile is already running, so anything set up in a
+# normal Chrome window (the laptop's name, the connected CSV, the day's records)
+# is the same here. There is no second copy to keep straight.
+
+# This file lives in Open the Audit.app/Contents/MacOS/, so the audit folder is
+# three levels up.
+HERE="$(cd "$(dirname "$0")/../../.." && pwd)"
+PAGE="file://$HERE/index.html"
+CHROME="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+
+if [ ! -x "$CHROME" ]; then
+  osascript -e 'display alert "Google Chrome is not installed" message "The audit only runs in Chrome. Install Chrome, then open this again."' >/dev/null 2>&1
+  exit 1
+fi
+
+if [ ! -f "$HERE/index.html" ]; then
+  osascript -e 'display alert "The audit files are missing" message "Keep this launcher inside the audit folder, next to index.html."' >/dev/null 2>&1
+  exit 1
+fi
+
+"$CHROME" --app="$PAGE" --window-size=1440,900 >/dev/null 2>&1 &
+exit 0

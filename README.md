@@ -17,10 +17,14 @@ Open `index.html` and it runs.
 
 Do this on each machine, ideally the day before.
 
-1. **Copy this whole folder** to the laptop. Anywhere is fine — Desktop is easiest.
-2. **Open `index.html` in Chrome.** Chrome, not Safari — Safari refuses to store
-   anything on a `file://` page, and that is where the day's leads sit before they
-   sync (ADR-0011).
+1. **Copy this whole folder** to the laptop. The Desktop is easiest.
+2. **Double-click `Open the Audit`.** It opens the audit in Chrome with no address
+   bar, no tabs and no menus, and it is how the laptop should be started every time,
+   including now. It has to be Chrome: Safari refuses to store anything on a page
+   opened from disk, and that is where the day's leads sit before they sync (ADR-0011).
+
+   The first time, macOS may say it cannot check the file. Right-click it, choose
+   **Open**, then **Open** again. It only asks once.
 3. **Open the staff menu**, the small round control at the bottom left, then
    **Settings**, and enter the PIN.
 4. **Name this laptop** in the box at the top, e.g. `theo-macbook`, and press Enter.
@@ -31,8 +35,11 @@ Do this on each machine, ideally the day before.
    dismisses that prompt the CSV stops updating for that run, and the admin panel
    says so.
 6. **Check the three tiles are green**, then click Back to the audit.
-7. **Full screen: `⌃⌘F`.** Hides the address bar and the tabs.
-8. Turn off sleep and notifications for the day.
+7. Turn off sleep and notifications for the day.
+
+**To close it:** the red button in the corner of the window, or `⌘Q`. There is also
+a **Close the audit** button in the admin panel, which asks twice before it acts. If
+Chrome refuses to close its own window, that button says so and tells you what to press.
 
 Whoever runs the booth does not need this file. **Help, top right of the admin
 panel** explains the CSV, both buttons and Chrome's permission box in plain words.
@@ -55,13 +62,26 @@ Edit `js/config.js` — it is the only file that needs changing.
 
 | | |
 |---|---|
-| **Production** | The folder, opened from disk. Writes to the `audits` table. |
+| **Production** | The folder, opened from disk, normally via `Open the Audit`. Writes to the `audits` table. |
 | **Dev** | Anything served over http(s). Writes to `audits_dev` and shows a coral bar across the top so a review can never be mistaken for a real session. |
 
 The switch is `location.protocol === 'file:'` — nothing to remember to flip.
 
 To run the dev copy locally: `python3 -m http.server 8000` in this folder, then
 open `http://127.0.0.1:8000`.
+
+## What the launcher is
+
+`Open the Audit.app` is eight lines of shell in a folder that macOS treats as an app.
+It starts Chrome in **app mode**, which hides the address bar, the tabs and the menus
+but keeps the ordinary window, so the red close button still works.
+
+It is deliberately not Chrome's **kiosk mode**. Kiosk hides the close button too, and
+leaves `⌘Q` as the only way out of a machine somebody is holding in front of a customer.
+
+It uses whatever Chrome profile is already running, so the laptop's name, the connected
+CSV and the day's records are the same whether the audit was opened through the launcher
+or by opening `index.html` directly. There is no second copy to keep straight.
 
 ## The staff controls
 

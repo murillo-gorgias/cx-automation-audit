@@ -127,8 +127,10 @@ CXA.admin = (function () {
             '<button class="btn" id="a-sync" type="button">Sync now</button>' +
             '<button class="btn btn--secondary" id="a-csv" type="button">Connect the CSV</button>' +
             '<button class="btn btn--secondary" id="a-export" type="button">Export a copy</button>' +
+            '<button class="btn btn--secondary a-quit" id="a-quit" type="button">Close the audit</button>' +
             '<span class="when"></span>' +
           '</div>' +
+          '<p class="a-quit-note" hidden></p>' +
           '<div class="card a-table">' +
             '<div class="hd"><span>Time</span><span>Name</span><span>Company</span><span>Band</span><span>Status</span></div>' +
             '<div class="rows"></div>' +
@@ -240,6 +242,43 @@ CXA.admin = (function () {
       clearTimeout(savedTimer);
       savedTimer = setTimeout(function () { savedFlag.hidden = true; }, 1600);
     }
+    /* Closing is deliberate and rare, so it asks twice. Nothing is lost either
+       way: every record is already on this laptop before this screen exists. */
+    var quitBtn = node.querySelector('#a-quit');
+    var quitNote = node.querySelector('.a-quit-note');
+    var quitArmed = false;
+    var quitTimer = null;
+
+    function disarmQuit() {
+      quitArmed = false;
+      quitBtn.textContent = 'Close the audit';
+      quitBtn.classList.remove('is-armed');
+    }
+
+    quitBtn.addEventListener('click', function () {
+      if (!quitArmed) {
+        quitArmed = true;
+        quitBtn.textContent = 'Close it, yes';
+        quitBtn.classList.add('is-armed');
+        quitNote.hidden = true;
+        clearTimeout(quitTimer);
+        quitTimer = setTimeout(disarmQuit, 5000);
+        return;
+      }
+      clearTimeout(quitTimer);
+      window.close();
+      /* Chrome refuses to close a window a script did not open, and whether it
+         obliges depends on how the app was started. If we are still here a
+         moment later, say what to press instead of leaving them guessing. */
+      setTimeout(function () {
+        disarmQuit();
+        quitNote.textContent =
+          'Chrome would not close the window from here. Use the red button in the ' +
+          'corner of the window, or press Cmd + Q.';
+        quitNote.hidden = false;
+      }, 400);
+    });
+
     deviceInput.addEventListener('change', saveDevice);
     deviceInput.addEventListener('keydown', function (e) {
       if (e.key === 'Enter') { e.preventDefault(); deviceInput.blur(); }
