@@ -111,8 +111,12 @@ CXA.store = (function () {
         Object.keys(patch).forEach(function (k) { records[i][k] = patch[k]; });
         /* Put the record back in the queue. Without this a change made after the
            first sync never leaves the laptop, which silently lost the booking
-           outcome for every visitor whose record synced before they chose. The
-           POST is an upsert keyed on id, so the row is overwritten, not doubled. */
+           outcome for every visitor whose record synced before they chose.
+           `sent_at` remembers that the row is already in the table, so the next
+           sync changes that row instead of trying to add it a second time. It is
+           a local marker only: it is not one of the COLUMNS, so it reaches
+           neither Supabase nor the CSV. */
+        records[i].sent_at = records[i].sent_at || records[i].synced_at;
         records[i].synced_at = null;
         break;
       }
@@ -130,6 +134,81 @@ CXA.store = (function () {
     return !!(s.url && s.anonKey);
   }
 
+  /* Two different requests, because the key is deliberately write-only.
+
+     A new record is added with POST. A record that has already reached the table
+     and then changed is altered with PATCH, filtered on its id. The older code
+     used one upsert for both, and Postgres refuses an upsert to a role that
+     cannot read the table: it has to look the existing row up before deciding to
+     overwrite it. Giving the key that read would let it read the leads, so the
+     app does the deciding instead. */
+
+  function headers(s, prefer) {
+    return {
+      'apikey': s.anonKey,
+      'Authorization': 'Bearer ' + s.anonKey,
+      'Content-Type': 'application/json',
+      'Prefer': prefer
+    };
+  }
+
+  function endpoint() {
+    var s = CXA.config.supabase;
+    return s.url.replace(/\/$/, '') + '/rest/v1/' + CXA.config.tableName();
+  }
+
+  function failed(res) {
+    return res.text().then(function (t) { throw new Error(res.status + ' ' + t); });
+  }
+
+  function postRows(records) {
+    var s = CXA.config.supabase;
+    return fetch(endpoint(), {
+      method: 'POST',
+      headers: headers(s, 'return=minimal'),
+      body: JSON.stringify(records.map(toRow))
+    });
+  }
+
+  function insertRows(records) {
+    if (!records.length) return Promise.resolve();
+
+    /* All of them in one request, which is the normal case and one round trip. */
+    return postRows(records).then(function (res) {
+      if (res.ok) return;
+
+      /* 409 is a duplicate id: a row landed on an earlier attempt and only the
+         reply was lost. Postgres rejects the whole batch over one duplicate, so
+         the others have not been written and must not be marked as sent. Send
+         them again one at a time, and skip only the row that is genuinely
+         already there. */
+      if (res.status === 409) {
+        return records.reduce(function (chain, r) {
+          return chain.then(function () {
+            return postRows([r]).then(function (one) {
+              if (one.ok || one.status === 409) return;
+              return failed(one);
+            });
+          });
+        }, Promise.resolve());
+      }
+
+      return failed(res);
+    });
+  }
+
+  function patchRow(record) {
+    var s = CXA.config.supabase;
+    var url = endpoint() + '?id=eq.' + encodeURIComponent(record.id);
+    return fetch(url, {
+      method: 'PATCH',
+      headers: headers(s, 'return=minimal'),
+      body: JSON.stringify(toRow(record))
+    }).then(function (res) {
+      if (!res.ok) return failed(res);
+    });
+  }
+
   function sync() {
     if (syncing) return Promise.resolve({ skipped: 'already running' });
     if (!configured()) return Promise.resolve({ skipped: 'supabase not configured' });
@@ -141,26 +220,21 @@ CXA.store = (function () {
     syncing = true;
     notify();
 
-    var s = CXA.config.supabase;
-    var url = s.url.replace(/\/$/, '') + '/rest/v1/' + CXA.config.tableName();
-    var rows = pending.map(toRow);
+    var fresh   = pending.filter(function (r) { return !r.sent_at; });
+    var changed = pending.filter(function (r) { return !!r.sent_at; });
 
-    return fetch(url, {
-      method: 'POST',
-      headers: {
-        'apikey': s.anonKey,
-        'Authorization': 'Bearer ' + s.anonKey,
-        'Content-Type': 'application/json',
-        'Prefer': 'return=minimal,resolution=merge-duplicates'
-      },
-      body: JSON.stringify(rows)
-    }).then(function (res) {
-      if (!res.ok) return res.text().then(function (t) { throw new Error(res.status + ' ' + t); });
+    return insertRows(fresh).then(function () {
+      return changed.reduce(function (chain, r) {
+        return chain.then(function () { return patchRow(r); });
+      }, Promise.resolve());
+    }).then(function () {
       var now = new Date().toISOString();
       var ids = {};
       pending.forEach(function (r) { ids[r.id] = true; });
       var records = all();
-      records.forEach(function (r) { if (ids[r.id]) r.synced_at = now; });
+      records.forEach(function (r) {
+        if (ids[r.id]) { r.synced_at = now; r.sent_at = r.sent_at || now; }
+      });
       writeAll(records);
       lastSyncAt = now;
       return { sent: pending.length };

@@ -94,10 +94,25 @@ revoke all on public.audits_dev from anon;
 grant insert, update on public.audits     to anon;
 grant insert, update on public.audits_dev to anon;
 
+-- The id column, and only the id column, is readable.
+--
+-- Setting the booking outcome is an update filtered on id. Postgres has to read
+-- that column to find the row, and refuses the whole statement if the role may
+-- not read it. Without this line the booking fails with
+-- "permission denied for table", which reads like a missing write privilege and
+-- is not one.
+--
+-- Naming the column keeps every lead field shut. Asking for an email still
+-- fails, because the privilege to read that column was never granted.
+grant select (id) on public.audits     to anon;
+grant select (id) on public.audits_dev to anon;
+
 drop policy if exists "anon may add an audit"            on public.audits;
 drop policy if exists "anon may set the booking outcome" on public.audits;
 drop policy if exists "anon may add an audit"            on public.audits_dev;
 drop policy if exists "anon may set the booking outcome" on public.audits_dev;
+drop policy if exists "anon may find a row by id"         on public.audits;
+drop policy if exists "anon may find a row by id"         on public.audits_dev;
 
 create policy "anon may add an audit"
   on public.audits for insert to anon with check (true);
@@ -111,23 +126,58 @@ create policy "anon may add an audit"
 create policy "anon may set the booking outcome"
   on public.audits_dev for update to anon using (true) with check (true);
 
+-- The second half of setting the booking outcome, and the easiest one to miss.
+--
+-- The grant above is a privilege. This is a row rule, and an update with a where
+-- clause needs both. Without a select policy the update matches no rows: the row
+-- is there, the statement succeeds, and nothing changes. Postgres raises no
+-- error, PostgREST answers 204, and the booking is quietly lost.
+--
+-- Paired with the single-column grant, this exposes the list of row ids and
+-- nothing else. The app generated those ids itself.
+create policy "anon may find a row by id"
+  on public.audits for select to anon using (true);
+
+create policy "anon may find a row by id"
+  on public.audits_dev for select to anon using (true);
+
 -- PostgREST caches the shape of the schema. Without this it can keep answering
 -- from a stale copy and insist a table or a privilege is not there.
 notify pgrst, 'reload schema';
 
--- Reading is left to signed-in Supabase users, which is how Angelo gets the
--- leads. No policy is granted to anon for select or delete, so neither is
--- possible with the key in the app.
+-- Reading a lead and deleting one are both left to signed-in Supabase users,
+-- which is how Angelo gets the leads.
 
 
 -- ---------------------------------------------------------------------------
--- What you should see after running this. Four rows for each table: INSERT and
--- UPDATE granted to anon, and nothing else. No SELECT, no DELETE.
+-- Never grant select on the whole table, and never widen the column list above.
+--
+-- It is tempting, because Postgres also refuses an upsert
+-- (`insert ... on conflict do update`) to a role that cannot read the table: it
+-- has to find the existing row before it can overwrite it. The fix is not to
+-- open up reading. The app does not upsert. It adds a row with insert and
+-- changes it later with update, which is what these rules are shaped for.
+--
+-- Reading is still how Angelo gets the leads, as a signed-in Supabase user. No
+-- policy and no privilege gives the key in the app any part of that.
 -- ---------------------------------------------------------------------------
 
-select table_name, grantee, privilege_type
+
+-- ---------------------------------------------------------------------------
+-- What you should see after running this: for each table, INSERT and UPDATE at
+-- table level, and SELECT on the single column `id`. Nothing else.
+-- ---------------------------------------------------------------------------
+
+select table_name, privilege_type, 'whole table' as scope
 from information_schema.role_table_grants
 where table_schema = 'public'
   and table_name in ('audits', 'audits_dev')
   and grantee = 'anon'
-order by table_name, privilege_type;
+union all
+select table_name, privilege_type, column_name
+from information_schema.column_privileges
+where table_schema = 'public'
+  and table_name in ('audits', 'audits_dev')
+  and grantee = 'anon'
+  and privilege_type = 'SELECT'
+order by table_name, privilege_type, scope;

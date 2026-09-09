@@ -39,7 +39,7 @@ call () {  # method path body -> prints the status code
   if [ -n "$b" ]; then
     curl -s -o /tmp/cxa-check.txt -w "%{http_code}" -X "$m" "$URL/rest/v1/$p" \
       -H "apikey: $KEY" -H "Authorization: Bearer $KEY" -H "Content-Type: application/json" \
-      -H "Prefer: return=minimal,resolution=merge-duplicates" -d "$b"
+      -H "Prefer: return=minimal" -d "$b"
   else
     curl -s -o /tmp/cxa-check.txt -w "%{http_code}" -X "$m" "$URL/rest/v1/$p" \
       -H "apikey: $KEY" -H "Authorization: Bearer $KEY"
@@ -48,6 +48,19 @@ call () {  # method path body -> prints the status code
 
 report () {  # label expectation code
   local label=$1 want=$2 code=$3
+  if [ "$want" = "empty" ]; then
+    # Listing ids is allowed and is the only read that is. The ids are values
+    # this app generated, so they carry nothing about anybody. Fail only if a
+    # field other than id comes back.
+    if [ "$code" = "200" ] && ! grep -qE '"(email|first_name|last_name|company|website)"' /tmp/cxa-check.txt; then
+      echo "  PASS  $label returns ids and nothing else (HTTP $code)"; return 0
+    fi
+    case "$code" in
+      401|403) echo "  PASS  $label is refused, as it must be (HTTP $code)"; return 0;;
+      *) echo "  FAIL  $label RETURNED DATA. The key can read leads and must not."
+         sed 's/^/        /' /tmp/cxa-check.txt | head -2; return 1;;
+    esac
+  fi
   if [ "$want" = "ok" ]; then
     case "$code" in
       2*) echo "  PASS  $label (HTTP $code)"; return 0;;
@@ -66,16 +79,19 @@ bad=0
 echo "Writing, which the app needs:"
 report "add a row to audits_dev" ok "$(call POST audits_dev "$(row null)")"     || bad=1
 report "add a row to audits"     ok "$(call POST audits     "$(row null)")"     || bad=1
-report "set the booking on it"   ok "$(call POST audits     "$(row '"booked"')")" || bad=1
+report "set the booking on that row" ok "$(call PATCH "audits?id=eq.$ID" '{"booking":"booked"}')" || bad=1
 echo
 echo "Reading and deleting, which the key must never be able to do:"
-report "reading the leads"  no "$(call GET    'audits?select=email&limit=1')" || bad=1
+report "reading an email"   no    "$(call GET 'audits?select=email&limit=1')" || bad=1
+report "reading a name"     no    "$(call GET 'audits?select=first_name&limit=1')" || bad=1
+report "listing row ids"    empty "$(call GET 'audits?select=id&limit=1')"     || bad=1
 report "deleting a lead"    no "$(call DELETE "audits?id=eq.$ID")"            || bad=1
 echo
 if [ "$bad" = 0 ]; then
   echo "All good. The app will sync."
 else
-  echo "Something is off. A 401 or 403 on a write usually means the grants in"
-  echo "supabase/schema.sql did not apply. Run that file again, whole, nothing selected."
+  echo "Something is off. Run supabase/schema.sql again, whole, nothing selected,"
+  echo "then re-run this. If a write still fails with \"permission denied for table\","
+  echo "the grant it wants is usually select on the id column, not a write privilege."
 fi
 exit "$bad"
