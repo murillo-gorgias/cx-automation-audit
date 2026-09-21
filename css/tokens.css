@@ -1,0 +1,68 @@
+/* Design tokens, taken from the Figma variables on the CX Automation Audit file.
+   Names match the Figma variable names so the two stay legible against each other. */
+
+@font-face { font-family:'Feature Deck'; src:url('../assets/fonts/FeatureDeck-Regular-Web.woff2') format('woff2'); font-weight:400; font-style:normal; font-display:block; }
+@font-face { font-family:'Feature Deck'; src:url('../assets/fonts/FeatureDeck-RegularItalic-Web.woff2') format('woff2'); font-weight:400; font-style:italic; font-display:block; }
+@font-face { font-family:'Inter'; src:url('../assets/fonts/InterVariable.woff2') format('woff2'); font-weight:100 900; font-style:normal; font-display:block; }
+@font-face { font-family:'Red Hat Mono'; src:url('../assets/fonts/RedHatMono-VF.woff2') format('woff2'); font-weight:300 700; font-display:block; }
+
+:root {
+  /* surface */
+  --surface-default:#FCFAF8;
+  --surface-light:#FFFFFF;
+  --surface-dark:#1B1A19;
+
+  /* content */
+  --content-primary:#1B1A19;
+  --content-secondary:#474543;
+  --content-faded:#8E8985;
+  --content-primary-inverted:#FCFAF8;
+  --content-secondary-inverted:#C0BBB5;
+
+  /* border */
+  --border-soft:#F0EBE5;
+  --border-bold:#DFD9D3;
+
+  /* brand */
+  --brand-500:#FB6B4B;
+  --brand-100:#FEF4F3;
+
+  /* interactive */
+  --button-primary-bg:#1B1A19;
+  --button-secondary-bg:#FFFFFF;
+  --button-secondary-border:#E8E2DC;
+  --button-secondary-border-dark:#474543;
+
+  /* state — only where a colour literally means fine / attention / wrong */
+  --state-ok:#289E43;      --state-ok-bg:#E1FFE8;
+  --state-warn:#CD721D;    --state-warn-bg:#FFE8DB;
+  --state-error:#C54040;   --state-error-bg:#FFEAEA;
+
+  /* type */
+  --font-display:'Feature Deck', Georgia, 'Times New Roman', serif;
+  --font-body:'Inter', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+  --font-mono:'Red Hat Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+
+  --heading-1:72px;
+  --heading-2:60px;
+  --heading-3:48px;
+  --heading-4:36px;
+  --heading-5:28px;
+  --text-large:20px;
+  --text-medium:18px;
+  --text-regular:16px;
+  --text-small:14px;
+  --text-tiny:12px;
+
+  --mono-tracking:0.06em;
+
+  /* geometry */
+  --radius-2xl:16px;
+  --radius-full:9999px;
+  --container-medium:1200px;
+  --frame-pad-x:120px;
+  --frame-pad-y:80px;
+  --col-gap:120px;
+
+  --shadow-sm:0 1px 3px 0 rgba(27,26,25,.1), 0 1px 2px -1px rgba(27,26,25,.1);
+}
