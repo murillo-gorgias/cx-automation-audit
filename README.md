@@ -57,24 +57,72 @@ is set for eCommerce Expo London 2026.
 | `bookingUtm.utm_campaign` | Still a placeholder. Bookings work; they will not trace back to the campaign until marketing ops sends the real value. |
 | `standNumber` | `D40`. Shown on the closing screen. |
 
-## The Supabase table
+## How the database works
 
-The project is live and the app writes to it. `bash supabase/check-connection.sh` runs
-seven checks against it and passes.
+**One row per completed audit.** The app writes it the moment the results screen
+appears, before the visitor has chosen what to do next. Nothing is written while
+they are still answering: a visitor who walks away on question three leaves no row.
 
-`supabase/schema.sql` created both tables and the rules around them. It is safe to paste
-into the Supabase SQL editor again if the rules ever need rebuilding.
+**Which table gets the row depends on how the app was opened, not on anything a
+person chooses.**
 
-Two things about it are deliberate. **Row Level Security is on**, because the key the
-app carries is published in a public repository: the rules let that key add an audit
-and come back to set the booking outcome, and nothing else. It cannot read a single
-lead. **Reading is left to signed-in Supabase users**, which is how marketing ops gets them.
+| How the app was opened | Table |
+|---|---|
+| From disk, which is what `audit-tool` does on a booth laptop | `audits` |
+| From a web address, including the live link above and a local server | `audits_dev` |
 
-The project sits in a **European region**. Visitors hand over a name and a work email
-in the EU, and the consent screen promises GDPR handling.
+Both tables have the same columns. `audits` is the real leads. `audits_dev` is
+anything written during a review or a demo, and can be emptied at any time.
 
-The database password is not used by this app at all. It is for connecting to Postgres
-directly. Keep it in 1Password, never in this repo.
+**Skipping the contact form does not change the table.** It sets `test = true`
+on the row and leaves the contact columns empty. The row still goes to the same
+table, the same CSV and the same browser storage, so a test run exercises the
+whole path. On a booth laptop a skipped run lands in `audits` with `test = true`.
+Filter `test = false` to see real leads.
+
+**Each row is written twice.** The first write adds the row with `booking` empty.
+When the visitor taps a button on the results screen, the app updates that one
+row and sets `booking` to one of:
+
+| Value | What happened |
+|---|---|
+| `booked` | Tapped the booking button while online. The HubSpot page opened. |
+| `intent_offline` | Tapped the booking button while offline. Nobody followed up on the spot. |
+| `follow_up` | Asked for a follow-up instead of booking. |
+| empty | Left the results screen without choosing, or the update has not synced yet. |
+
+**What is in a row.** The visitor's contact details and consent; every answer they
+tapped, both the label and the number the maths used; the readiness band and the
+plan it maps to; the four figures they were shown on screen; the booking outcome;
+`test`; `device`, the laptop's name; and `app_version`. `synced_at` is when the
+row reached the table. The full list is in `supabase/schema.sql`.
+
+**When it syncs.** Straight away if the laptop is online. If not, the row waits in
+the browser's storage and the app retries every 60 seconds and again the moment
+the connection returns. The admin panel counts what is waiting. A booking chosen
+after the row already synced re-queues the row, so the outcome follows it up.
+
+**The same row also goes to a CSV on the laptop**, when one is connected in the
+admin panel. The CSV is rewritten in full after every audit and every booking
+choice, so it always matches the browser's storage exactly. It is the backup if
+the connection never comes back.
+
+**What the key in the app is allowed to do.** The app carries the project's anon
+key, which is public by design. Row Level Security is on, and the rules in
+`supabase/schema.sql` let that key do exactly three things: add a row, find a row
+by its id, and update a row's columns. It cannot read a name, an email or a
+figure. Reading is for signed-in Supabase users only, which is how marketing ops
+gets the leads.
+
+The project sits in a **European region**. Visitors hand over a name and a work
+email in the EU, and the consent screen promises GDPR handling.
+
+`bash supabase/check-connection.sh` runs seven checks against the live project
+and confirms the key can do what it should and nothing more. `supabase/schema.sql`
+is safe to paste into the SQL editor again if the rules ever need rebuilding.
+
+The database password is not used by this app at all. It is for connecting to
+Postgres directly. Keep it in 1Password, never in this repo.
 
 ## Running it
 
